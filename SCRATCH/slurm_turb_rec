@@ -1,0 +1,30 @@
+#!/bin/bash
+#SBATCH --mail-type=ALL
+## Please modify mail accordingly
+#SBATCH --mail-user=lovepreet.singh@polito.it
+#SBATCH --nodes=4
+#SBATCH --ntasks=16
+#SBATCH --ntasks-per-node=4
+#SBATCH --cpus-per-task=32
+#SBATCH --gres=gpu:4
+#SBATCH --time=02:30:00           
+#SBATCH --error myJob.err      # std-error file
+#SBATCH --output myJob.out     # std-output file
+#SBATCH --account=tra22_HackGpu   # account number
+#SBATCH --partition=m100_sys_test  # partition to be used
+#SBATCH --qos=qos_test
+
+module purge
+module load autoload hpc-sdk/2021--binary
+module load autoload spectrum_mpi/10.4.0--binary
+module load cuda/11.3
+module list
+date > time_run.dat
+
+rm -rf /tmp/nvidia
+ln -s $TMPDIR /tmp/nvidia
+mpirun -np 16 --map-by socket:PE=8 --rank-by core bash ./wrap.sh  ./pgi_turbo_rec.x > myoutput
+#mpirun -gpu -np 4 --map-by socket:PE=8 --rank-by core nvprof  ./pgi_turbo_rec.x > myoutput
+rm -rf /tmp/nvidia
+date >> time_run.dat
+:
