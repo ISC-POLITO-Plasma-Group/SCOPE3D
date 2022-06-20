@@ -45,7 +45,7 @@ c  This routine calculates the first derivative in x direction (CFD 3 points)
         do ix = 1,nx         
           aux_f1(ix) = f1(ix)
         enddo
-
+!$acc enter data copyin(aux_f1)
 c*******************************
 
 !        do i=1,nx
@@ -68,7 +68,7 @@ c*******************************
      & pBuffer) 
 
 !$acc end host_data
-
+!$acc exit data copyout(aux_f1)
 !!!!!!!!!!!!   CPU BEGIN !!!!!!!!!!  
 
 !        CALL  DGTTRS(TRANS,nx,NRHS,aux_alfa_1_G,aux_gamma_1_G,

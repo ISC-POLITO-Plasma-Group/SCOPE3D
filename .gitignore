@@ -2,3 +2,4 @@
 comm/*.o
 *.x
 comm/*.a
+nvtx.mod
