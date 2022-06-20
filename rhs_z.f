@@ -14,10 +14,8 @@
       if (nz .ge. 4) then
 
       q4 = phi  
-       write(*,*),'before trasponi_zx rhs_z 1'
 
       call trasponi_zx(q4,q4_t,1)
-       write(*,*),'after trasponi_zx rhs_z 1'
 
       do j=1,nyl
          do i = 1, nxl2

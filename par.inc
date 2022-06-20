@@ -1,6 +1,6 @@
         implicit real*8(a-h,o-z)
 
-        parameter(nx=1024, ny=1024, nz=1024, nx1 = nx - 1)
+        parameter(nx=1024, ny=96, nz=96, nx1 = nx - 1)
 
         parameter(nprocx=4096)
 
@@ -43,8 +43,9 @@
         common/firstderG/aa_1_G(nx),bb_1_G(nx),cc_1_G(nx),
      &      d_1_G(nx),alfa_1_G(nx-1),beta_1_G(nx-1),
      &      aux_alfa_1_G(nx-1),aux_beta_1_G(nx-1),
-     &      aux_gamma_1_G(nx),ww_1_G(nx-2),ipv_1_G(nx)
-
+     &      aux_gamma_1_G(nx),ww_1_G(nx-2),ipv_1_G(nx),
+     &      aux_alfa_2_G(nx),aux_beta_2_G(nx)
+     
         common/secderivx1/alfa_2(nx1),beta_2(nx1)
         common/secderivx2/fact_alfa_2(nx1),ipv2(nx)
         common/secderivx5/fact_ww_2(nx-2)

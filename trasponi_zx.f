@@ -9,9 +9,8 @@
 !        write(6,*) ' DEBUG trasponi_zx ', idir
         call nvtxStartRange('trasponi_zx',19)
         if( idir >= 0 ) then
-         
+
           ibufsize = nzl * nyl * nxl2 ! size of the block
-          write(*,*),'ibufsiz trasponi_zx', ibufsize
           DO IP = 1, NPROCZ
             ISOUR = MOD(MPIME-IP+NPROCZ,NPROCZ)  !  ISOUR -> MPIME - 1 ... NPROC
             IDEST = MOD(MPIME+IP      ,NPROCZ)  !  IDEST -> MPIME + 1 ... NPROC

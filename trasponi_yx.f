@@ -11,8 +11,6 @@
         if( idir >= 0 ) then
 
           ibufsize = nzl * nyl * nxl ! size of the block
-          write(*,*),'ibufsize=',ibufsize
-
           DO IP = 1, NPROCY
             ISOUR = MOD(INT(MPIME/NPROCZ)-IP+NPROCY,NPROCY)  !  ISOUR -> MPIME - 1 ... NPROC
             IDEST = MOD(INT(MPIME/NPROCZ)+IP      ,NPROCY)  !  IDEST -> MPIME + 1 ... NPROC

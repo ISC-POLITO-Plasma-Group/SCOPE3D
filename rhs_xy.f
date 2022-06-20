@@ -19,11 +19,12 @@ c      dimension zmagn(nx,nyl)
 
 c     derivo (rispetto a x)
        call nvtxStartRange('rhs_xy',13)
-!!$acc enter data copyin(phi,psi,cur,hp1,uu,x) 
-!!$acc& create(f1(1:nx),f2(1:nx),ff1(1:nx),ff2(1:nx),fff1(1:nx))
-!!$acc& create(d1(1:nx),d2(1:nx),dd1(1:nx),dd2(1:nx),ddd1(1:nx))
-!!$acc& create(phix(1:nx,1:nyl,1:nzl),curx(1:nx,1:nyl,1:nzl))
-!!$acc& create(hpx(1:nx,1:nyl,1:nzl),hmx(1:nx,1:nyl,1:nzl))       
+!$acc enter data copyin(phi,psi,cur,hp1,uu,x) 
+!$acc& create(f1(1:nx),f2(1:nx),ff1(1:nx),ff2(1:nx),fff1(1:nx))
+!$acc& create(d1(1:nx),d2(1:nx),dd1(1:nx),dd2(1:nx),ddd1(1:nx))
+!$acc& create(phix(1:nx,1:nyl,1:nzl),curx(1:nx,1:nyl,1:nzl))
+!$acc& create(psix(1:nx,1:nyl,1:nzl))
+!$acc& create(hpx(1:nx,1:nyl,1:nzl),hmx(1:nx,1:nyl,1:nzl))       
       do iz = 1,nzl
          do iy = 1,nyl
             do ix = 1,nx
@@ -73,17 +74,18 @@ c     derivo (rispetto a x)
             enddo
          enddo
       enddo
-!!$acc exit data delete(phi,psi,cur,hp1,uu,x)
-!!$acc& delete(f1(1:nx),f2(1:nx),ff1(1:nx),ff2(1:nx),fff1(1:nx))
-!!$acc& delete(phix(1:nx,1:nyl,1:nzl),curx(1:nx,1:nyl,1:nzl))
-!!$acc& delete(hpx(1:nx,1:nyl,1:nzl),hmx(1:nx,1:nyl,1:nzl))       
+!$acc exit data delete(phi,psi,cur,hp1,uu,x)
+!$acc& delete(f1(1:nx),f2(1:nx),ff1(1:nx),ff2(1:nx),fff1(1:nx))
+!$acc& delete(phix(1:nx,1:nyl,1:nzl),curx(1:nx,1:nyl,1:nzl))
+!$acc& delete(psix(1:nx,1:nyl,1:nzl))
+!$acc& delete(hpx(1:nx,1:nyl,1:nzl),hmx(1:nx,1:nyl,1:nzl))       
 
 !---------derivo cur rispetto a y--------------
 
         aux = cur
 
         call trasponi_yx(aux,aux_t,1)
-       write(*,*),'after trasponi_yx rhs_xy 1'
+
         do iz = 1,nzl
            do ix = 1,nxl
               do iy = 1,ny
@@ -97,10 +99,9 @@ c     derivo (rispetto a x)
         enddo
 
         call trasponi_yx(aux,aux_t,-1)
-       write(*,*),'after trasponi_yx rhs_xy 2'
 
         cury = aux
-    
+
 !--------------------------------------------------
 
         rhshpxy1 = - (phix * hpy - phiy * hpx)

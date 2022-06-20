@@ -11,8 +11,8 @@ F90= mpipgifort
 EXE= ./pgi_turbo_rec.x
 #endif
 
-FFLAGS =  -O2 -g -c -acc=gpu -ta=tesla -Minfo=accel
-LNKFLAGS = -acc=gpu -ta=tesla -Minfo=accel -I/cineca/prod/opt/compilers/hpc-sdk/2021/binary/Linux_ppc64le/21.5/cuda/11.3/include -L/cineca/prod/opt/compilers/hpc-sdk/2021/binary/Linux_ppc64le/21.5/cuda/11.3/lib64 -lnvToolsExt
+FFLAGS =  -O2 -g -c -acc=gpu -ta=tesla -Minfo=accel -Mcuda
+LNKFLAGS = -acc=gpu -ta=tesla -Minfo=accel -I/cineca/prod/opt/compilers/hpc-sdk/2021/binary/Linux_ppc64le/21.5/cuda/11.3/include -L/cineca/prod/opt/compilers/hpc-sdk/2021/binary/Linux_ppc64le/21.5/cuda/11.3/lib64 -cudalib=cusparse -lnvToolsExt
 
 all: $(COMM) MAIN
 

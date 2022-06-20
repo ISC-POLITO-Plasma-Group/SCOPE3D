@@ -480,7 +480,9 @@ c   filter parameters
 ***** Setup derivata x tridiagonale LU   ***
 !
 !     calcolo coefficienti interni 
-
+        aux_beta_2_G=0.0
+        aux_alfa_2_G=0.0
+       
       do ix = 2,nx-1
          
          dp1 = dx(ix)
@@ -505,6 +507,7 @@ c   filter parameters
      &        0.5d0 * dm2 * aa_1_G(ix) -  dm1) / (dp1 + dm1)
          alfa_1_G(ix-1) = - dm1 * aa_1_G(ix) + dp1 * cc_1_G(ix) - 
      &        beta_1_G(ix) - 1.0d0
+         
          bb_1_G(ix) = - aa_1_G(ix) - cc_1_G(ix)
           
       enddo
@@ -571,20 +574,28 @@ c   filter parameters
       
       do ix = 1,nx-1
          aux_alfa_1_G(ix) = alfa_1_G(ix)
+         aux_alfa_2_G(ix+1) = alfa_1_G(ix)
          aux_gamma_1_G(ix) = 1.0d0
          aux_beta_1_G(ix) = beta_1_G(ix)
+         aux_beta_2_G(ix) = beta_1_G(ix)
       enddo
-
+         aux_beta_2_G(nx)=0.0
+         aux_alfa_2_G(1) =0.0
       aux_gamma_1_G(nx) = 1.0d0
-       
-      CALL DGTTRF(nx, aux_alfa_1_G, aux_gamma_1_G, aux_beta_1_G, 
-     &     ww_1_G,ipv_1_G, info)
+!$acc enter data copyin(aux_beta_2_G, aux_alfa_2_G, aux_gamma_1_G)      
+ 
+!!!!!!!!!!! FOR CPU !!!!!!!!!!!!!
 
-      if (info > 0 .or. info < 0) then
-         write(*,*) 'Problemi LU - init_der1x - , info:', info
-         stop
-      endif
+!      CALL DGTTRF(nx, aux_alfa_1_G, aux_gamma_1_G, aux_beta_1_G, 
+!     &     ww_1_G,ipv_1_G, info)
 
+      
+!      if (info > 0 .or. info < 0) then
+!         write(*,*) 'Problemi LU - init_der1x - , info:', info
+!         stop
+!      endif
+
+!!!!!!!!!!! FOR CPU !!!!!!!!!!!!
 ***************************************************
 
 ***** Setup derivata seconda x tridiagonale LU per Psi  ***

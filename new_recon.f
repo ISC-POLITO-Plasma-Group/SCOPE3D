@@ -206,16 +206,14 @@
          time = 0. 
          ioutt = 1
          ioutf = 1
-      write(*,*),'before energie_mod riga 209'
+
          call energie_mod
-      write(*,*),'after energie_mod riga 211'
+
 !*************RIPRISTINA******
          call out_field
-      write(*,*),'before corrente_res riga 214'
 
 !**********TEST CORRENTE_RES**********
          call corrente_res
-      write(*,*),'after corrente_res riga 218'
 
 !         call out_field         
 !*****************************
@@ -281,8 +279,7 @@
         oldtime = time
 
         write(*,*) 'time=', time
-      write(*,*),'before corrente_res riga 284'
-        
+
         uu =hm 
         cur_old=cur
         if (de.eq.0) then 
@@ -292,7 +289,7 @@
 !          call corrente_res 
           cur=(hp-psi)/de2    !!!!!DA RIPRISTINARE SUBITO!!!!!!!!!!!!!!
         endif
-      write(*,*),'after corrente_res and before rhs riga 295'
+
 !        call rhs_xy_lin(hp,hp_pascal,rhshpxy,rhshmxy,rhspascalxy,
 !     &           rhstparexy,rhstperpexy)
 
@@ -307,7 +304,6 @@
         flxp1 = rhshpxy +rhshpz
         flxm1 = rhshmxy +rhshmz
     
-      write(*,*),'after rhs riga 310'
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !        call helm_mod(flxp1)
@@ -350,7 +346,6 @@
 
       call nvtxEndRange()
 
-      write(*,*),'after filter riga 353'
 !--------------------------------------------------
 
         call nvtxStartRange('second_timestep',2)
@@ -369,13 +364,11 @@
 !           uu  =uu_temp
 !******************************
 !******** TAU eq 0************
-      write(*,*),'before poisson_mod riga 372'
 
            call poisson_mod
 !******************************
 
 
-      write(*,*),'after poisson_mod  riga 378'
         cur_old=cur
         if (de.eq.0) then
            psi = hp
@@ -399,10 +392,9 @@
 
 !        call rhs_xy_lin(hp,hp_pascal,rhshpxy,rhshmxy,rhspascalxy,
 !     &           rhstparexy,rhstperpexy)
-        write(*,*),'before rhs_xy and rhs_z riga 402'
         call rhs_xy(hp,rhshpxy,rhshmxy)
         call rhs_z(rhshpz,rhshmz)
-        write(*,*),'after rhs_xy and rhs_z riga 405'
+
         flxp2 = rhshpxy +rhshpz
         flxm2 = rhshmxy +rhshmz
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -441,7 +433,6 @@
         endif
            
       call nvtxEndRange()
-      write(*,*),'before Adam-Bashforth riga 444'
 !------------------------------------------------------
 !      inizio Adams-Bashforth
 !-----------------------------------------------------
@@ -493,10 +484,10 @@
 
 !           call rhs_xy_lin(hp,hp_pascal,rhshpxy,rhshmxy,rhspascalxy,
 !     &         rhstparexy,rhstperpexy)
-          write(*,*),'before rhs riga 496',it,mpime
+
            call rhs_xy(hp,rhshpxy,rhshmxy)
            call rhs_z(rhshpz,rhshmz)
-         write(*,*),'after rhs riga 499',it,mpime
+
 !*************TEST DPSIDT****************           
            flxp_av = rhshpxy +rhshpz
 !           call helm_mod(flxp_av)
@@ -607,7 +598,7 @@
          if( mpime == root ) then
             close (unit=70)
          end if
-       write(*,*), 'mi sono calcolato tutto'            
+            
 !------------------------------------------------------------
 !*******************************
 
@@ -667,7 +658,6 @@
       
       call nvtxEndRange()
       enddo
-      write(*,*),'ho scritto tutto'
       call nvtxEndRange()
 !********************************   
 !    PARTE NUOVA (per il riavvio)
@@ -712,6 +702,7 @@
         deallocate(fact_aa_1,fact_bb_1,fact_cc_1)
         deallocate(fact_ww_1,ipv_my_1)
         deallocate(e_para,abs_b)
+!$acc exit data delete(aux_alfa_2_G, aux_beta_2_G, aux_gamma_1_G)
 !        deallocate(d2_uu)
 !        deallocate(uu_temp)
 
