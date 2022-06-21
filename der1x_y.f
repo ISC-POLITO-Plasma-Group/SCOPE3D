@@ -4,7 +4,7 @@
 ! Usata per derivare G+ e G-                          !
 ! --------------------------------------------------- !
 
-        subroutine der1x_y(F0,aux_f1,use_gpu_here)
+        subroutine der1x_y(F0,f1,use_gpu_here)
 
 c  This routine calculates the first derivative in x direction (CFD 3 points)
         use nvtx
@@ -13,7 +13,7 @@ c  This routine calculates the first derivative in x direction (CFD 3 points)
         use cusparse
         include 'par.inc'   
 
-        dimension aux_f1(nx,nyl),F0(nx,nyl),f1(nx,nyl)
+        dimension F0(nx,nyl),f1(nx,nyl)
         integer(4)::  ierr
         integer(8):: pBufferSizeInBytes
         character(1), device, allocatable:: pBuffer(:)       
@@ -26,8 +26,7 @@ c  This routine calculates the first derivative in x direction (CFD 3 points)
         
 
         call nvtxStartRange('der1x_y',17)
-!$acc enter data create(f1(1:nx,1:nyl))
-!$acc parallel loop copyin(F0) copyin(aa_1_G,bb_1_G,cc_1_G,d_1_G)
+!$acc parallel loop present(F0,f1) copyin(aa_1_G,bb_1_G,cc_1_G,d_1_G)
         do iy = 1, nyl
 !$acc loop seq        
             do ix = 2, nx-1
@@ -74,7 +73,6 @@ c  This routine calculates the first derivative in x direction (CFD 3 points)
      & pBuffer) 
 
 !$acc end host_data
-!$acc exit data copyout(f1)
 
 #endif
        else 
@@ -91,11 +89,6 @@ c  This routine calculates the first derivative in x direction (CFD 3 points)
       endif
 
 !!!!!!!!!!!    CPU END !!!!!!!!!!!
-        do iy = 1,nyl
-           do ix = 1,nx         
-              aux_f1(ix,iy) = f1(ix,iy)
-           enddo
-        enddo   
        call nvtxEndRange()
 	return
         end
