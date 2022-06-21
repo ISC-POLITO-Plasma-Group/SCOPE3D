@@ -49,6 +49,7 @@ c  This routine calculates the first derivative in x direction (CFD 3 points)
         enddo
 
         if (use_gpu_here) then 
+#ifdef _OPENACC
 !$acc enter data copyin(aux_f1) 
 c*******************************
 
@@ -73,6 +74,7 @@ c*******************************
 
 !$acc end host_data
 !$acc exit data copyout(aux_f1)
+#endif       
        else 
        CALL  DGTTRS(TRANS,nx,NRHS,aux_alfa_1_G,aux_gamma_1_G,
      &        aux_beta_1_G,ww_1_G,ipv_1_G,aux_f1,LDB,INFO)

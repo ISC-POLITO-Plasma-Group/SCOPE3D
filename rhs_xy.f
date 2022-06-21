@@ -51,19 +51,19 @@ c     derivo (rispetto a x)
         do iy = 1,nyl
             do ix = 1,nx
 !***************** Bikley jet **************************
-               phix(ix,iy,iz) = 0.0*d1(ix,iy)+ phieq/(dcosh(x(ix)))**2.0d0
+               phix(ix,iy,iz) = 1.0*d1(ix,iy)+ phieq/(dcosh(x(ix)))**2.0d0
 !*******************************************************
 !***************** Vortex sheet **************************
 !               phix(ix,iy,iz) = d1(ix)+ phieq*tanh(x(ix)/eq_l)
 !*******************************************************
 !***************Harris pinch****************************
-               psix(ix,iy,iz) = 0.0*d2(ix,iy) - psoeq
+               psix(ix,iy,iz) = 1.0*d2(ix,iy) - psoeq
      &                 * dtanh(x(ix)/eq_l)
      &                 + asym*yl/zl
-               curx(ix,iy,iz) = 0.0*dd1(ix,iy) - psoeq  
+               curx(ix,iy,iz) = 1.0*dd1(ix,iy) - psoeq  
      &          * 2.0d0 * dtanh(x(ix)/eq_l)
      &          *(1.0d0 - (dtanh(x(ix)/eq_l))**2.0d0)/(eq_l**2.)
-               hpx(ix,iy,iz) = 0.0*dd2(ix,iy) - psoeq 
+               hpx(ix,iy,iz) = 1.0*dd2(ix,iy) - psoeq 
      &              * dtanh(x(ix)/eq_l)
      &              + asym*yl/zl
      &          - de2 * psoeq * 2.0d0 * dtanh(x(ix)/eq_l) * 
@@ -71,7 +71,7 @@ c     derivo (rispetto a x)
      &         /(eq_l**2.)
 !********************************************************
 !************* Bikley jet ******************************* 
-               hmx(ix,iy,iz) = 0.0*ddd1(ix,iy) - 2.0d0*phieq
+               hmx(ix,iy,iz) = 1.0*ddd1(ix,iy) - 2.0d0*phieq
      &              *(1.0d0-2.0d0*(dsinh(x(ix)))**2.0d0)
      &              /(dcosh(x(ix)))**4.0d0          
 !********************************************************
