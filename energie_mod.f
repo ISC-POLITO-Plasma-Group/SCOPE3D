@@ -18,7 +18,7 @@ c*******energia magnetica
             do ix = 1, nx
                fx(ix) = psi(ix,iy,iz) 
             enddo
-            CALL der1x_free(fx, f1x)
+            CALL der1x_free(fx, f1x, .false.)
             do ix = 1, nx
                f1x(ix) = f1x(ix) - psoeq * dtanh(x(ix)/eq_l)/eq_l  
      &              + asym*yl/zl

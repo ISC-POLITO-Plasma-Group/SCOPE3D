@@ -4,23 +4,25 @@
 ! Usata per derivare G+ e G-                          !
 ! --------------------------------------------------- !
 
-        subroutine der1x_free(F0,aux_f1)
+        subroutine der1x_free(F0,aux_f1,use_gpu_here)
 
 c  This routine calculates the first derivative in x direction (CFD 3 points)
         use nvtx
+        use gpu_func
         use cudafor
         use cusparse
         include 'par.inc'   
 
         dimension aux_f1(nx),F0(nx),f1(nx)
-        type(cusparseHandle):: handle
         integer(4)::  ierr
         integer(8):: pBufferSizeInBytes
         character(1), device, allocatable:: pBuffer(:)       
-        
+!        logical use_gpu
+        logical use_gpu_here 
+
+!       use_gpu_here  = .false.
+!       if(present(use_gpu)) use_gpu_here = use_gpu 
 !       costruzione termine noto
-        ierr=cusparseCreate(handle)
-        if (ierr .ne. 0) write(*,*) 'handle creation failed'
         
 
         call nvtxStartRange('der1x_free',17)
@@ -45,7 +47,9 @@ c  This routine calculates the first derivative in x direction (CFD 3 points)
         do ix = 1,nx         
           aux_f1(ix) = f1(ix)
         enddo
-!$acc enter data copyin(aux_f1)
+
+        if (use_gpu_here) then 
+!$acc enter data copyin(aux_f1) 
 c*******************************
 
 !        do i=1,nx
@@ -69,23 +73,21 @@ c*******************************
 
 !$acc end host_data
 !$acc exit data copyout(aux_f1)
-!!!!!!!!!!!!   CPU BEGIN !!!!!!!!!!  
-
-!        CALL  DGTTRS(TRANS,nx,NRHS,aux_alfa_1_G,aux_gamma_1_G,
-!     &        aux_beta_1_G,ww_1_G,ipv_1_G,aux_f1,LDB,INFO)
+       else 
+       CALL  DGTTRS(TRANS,nx,NRHS,aux_alfa_1_G,aux_gamma_1_G,
+     &        aux_beta_1_G,ww_1_G,ipv_1_G,aux_f1,LDB,INFO)
 
         
 
-!        if (info > 0 .or. info < 0) then
-!          write(*,*) 'Problemi soluzione, info:', info
-!        stop
-!        endif
+        if (info > 0 .or. info < 0) then
+          write(*,*) 'Problemi soluzione, info:', info
+        stop
+        endif
+      endif 
 
 !!!!!!!!!!!    CPU END !!!!!!!!!!!
 
         call nvtxEndRange()
-        ierr=cusparseDestroy(handle)
-        if (ierr .ne. 0) write(*,*) 'handle destruction failed'
 
 	return
         end

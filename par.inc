@@ -5,7 +5,7 @@
         parameter(nprocx=4096)
 
         CHARACTER*1 TRANS
-
+        
         integer nzl ! number of z planes per processor
         integer nzg ! number of global z planes = nz
         integer izlg ! global index of the local first plane

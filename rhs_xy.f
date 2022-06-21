@@ -1,5 +1,6 @@
       subroutine rhs_xy(hp1,rhshpxy1,rhshmxy1)
-      use nvtx 
+      use nvtx
+      use gpu_func 
       include 'par.inc'
 
       dimension d1(nx),d2(nx),dd1(nx),dd2(nx),ddd1(nx),dd3(ny)
@@ -11,6 +12,7 @@
 
       real(8), dimension (nx,nyl,nzl) ::  
      &     phix,psix,hpx,hmx,curx,cury
+
 
 
 c      dimension zmagn(nx,nyl)
@@ -35,12 +37,12 @@ c     derivo (rispetto a x)
                fff1(ix) = uu(ix,iy,iz)
                
             enddo
-            CALL der1x_free(f1,d1)
-            CALL der1x_free(f2,d2)
-            CALL der1x_free(ff1,dd1)
-            CALL der1x_free(ff2,dd2)
-            CALL der1x_free(fff1,ddd1)
-
+            CALL der1x_free(f1,d1,use_gpu)
+            CALL der1x_free(f2,d2,use_gpu)
+            CALL der1x_free(ff1,dd1,use_gpu)
+            CALL der1x_free(ff2,dd2,use_gpu)
+            CALL der1x_free(fff1,ddd1,use_gpu)
+       call nvtxStartRange('after der1x_free',13)
             do ix = 1,nx
 !***************** Bikley jet **************************
                phix(ix,iy,iz) = 0.0*d1(ix)+ phieq/(dcosh(x(ix)))**2.0d0
@@ -72,6 +74,7 @@ c     derivo (rispetto a x)
 !********************************************************
 
             enddo
+         call nvtxEndRange()
          enddo
       enddo
 !!$acc exit data delete(phi,psi,cur,hp1,uu,x)

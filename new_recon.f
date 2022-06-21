@@ -1,5 +1,6 @@
       program recon
       use nvtx
+      use gpu_func
       include 'par.inc'
            
       real*8, dimension (:,:,:), allocatable :: 
@@ -8,8 +9,9 @@
      &     ,rhshpxy, rhshpz,rhshmxy, rhshmz
      &     ,hp, hm, psi_temp,flxp_av
      &     ,psiy_temp,hpy_temp
-!     &     ,uu_temp 
+!     &     ,uu_temp
       double precision t1, t2, usrtime
+      integer(4) ierr
 
 !-----------------------------------------------------------------
 !   nx = number of grid points in the x-direction
@@ -39,6 +41,8 @@
          read (7,*)
          read (7,*) de, rhos, beta_e, tau, eta, mm, pso, psoeq, 
      &              phieq, eq_l, asym
+         read (7,*) 
+         read (7,*) use_gpu
          read (7,*)   
          read (7,*) istart, omegax, omega, alfa1
          read (7,*)   
@@ -75,6 +79,7 @@
       call bcast_real(phieq,1,root)
       call bcast_real(eq_l,1,root)
       call bcast_real(asym,1,root)
+      call bcast_logical(use_gpu,1,root)
       call bcast_integer(istart,1,root)
       call bcast_integer(irestart_zero,1,root)
       call bcast_integer(kbc_p,1,root)
@@ -133,10 +138,19 @@
       allocate(e_para(nx,nyl,nzl))
       allocate(abs_b(nx,nyl,nzl))
 
+
 !      allocate(d2_uu(nx,nyl,nzl))
 !      allocate(uu_temp(nx,nyl,nzl))
+      
+!!!!! Initializing stuff for GPU !!!!!!
+        if (use_gpu) then
+                
+        call nvtxStartRange('handler',15)
+        ierr=cusparseCreate(handle)
+        if (ierr .ne. 0) write(*,*) 'handle creation failed'
+        call nvtxEndRange()
+        endif 
 
-  
       if(istart.EQ.1) then
          
          if( mpime == root ) then
@@ -705,6 +719,11 @@
 !$acc exit data delete(aux_alfa_2_G, aux_beta_2_G, aux_gamma_1_G)
 !        deallocate(d2_uu)
 !        deallocate(uu_temp)
+        if (use_gpu) then
+          ierr=cusparseDestroy(handle)
+
+          if (ierr .ne. 0) write(*,*) 'handle destruction failed'
+        endif
 
         call hangup()
         call nvtxEndRange()
