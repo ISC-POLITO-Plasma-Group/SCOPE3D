@@ -645,7 +645,7 @@
            psi_temp = psi
            hpy_temp = hpy
            psiy_temp = psiy 
-           call helm_mod(flxp_av)
+!           call helm_mod(flxp_av)
            dpsi_dt = psi 
            psi = psi_temp
            hpy = hpy_temp

@@ -25,15 +25,19 @@ c  This routine calculates the first derivative in x direction (CFD 3 points)
 !       costruzione termine noto
         
 
-        call nvtxStartRange('der1x_free',17)
+        call nvtxStartRange('der1x_y',17)
+!$acc enter data create(f1(1:nx,1:nyl))
+!$acc parallel loop copyin(F0) copyin(aa_1_G,bb_1_G,cc_1_G,d_1_G)
         do iy = 1, nyl
+!$acc loop seq        
             do ix = 2, nx-1
+               
                f1(ix,iy) = aa_1_G(ix) * F0(ix-1,iy) + bb_1_G(ix) 
      &                     * F0(ix,iy) 
-     &                     + cc_1_G(ix) * F0(ix+1,iy)  
+     &                     + cc_1_G(ix) * F0(ix+1,iy) 
+                
             enddo
         
-
    
           f1(1,iy) = aa_1_G(1) * F0(1,iy) + bb_1_G(1) * F0(2,iy) 
      &         + cc_1_G(1) * F0(3,iy) + d_1_G(1) * F0(4,iy)
@@ -44,44 +48,39 @@ c  This routine calculates the first derivative in x direction (CFD 3 points)
 !        write(*,*) 'OCCHIO ai COEFFICIENTI in DER1X'
 !        write(*,*)  f1(1)
       
-
-*******************************************
-       
-           do ix = 1,nx         
-              aux_f1(ix,iy) = f1(ix,iy)
-           enddo
        enddo
        
         if (use_gpu_here) then 
 #ifdef _OPENACC                
-!$acc enter data copyin(aux_f1) 
-c*******************************
+
 
 !        do i=1,nx
 !        write(63,*) aux_alfa_1(i),aux_gamma_1(i),aux_beta_1(i) 
 !        enddo
 
 !$acc host_data use_device(aux_alfa_2_G,aux_gamma_1_G,aux_beta_2_G,
-!$acc& aux_f1)
+!$acc& f1)
 
        ierr=ierr + cusparseDgtsv2_bufferSize(handle,nx,nyl,
      & aux_alfa_2_G,
-     & aux_gamma_1_G,aux_beta_2_G,aux_f1,LDB,
+     & aux_gamma_1_G,aux_beta_2_G,f1,LDB,
      & pBufferSizeInBytes)
 
        write(*,*) 'buffersize=', pBufferSizeInBytes
        allocate(pBuffer(pBufferSizeInBytes))
 
        ierr= ierr + cusparseDgtsv2(handle, nx, nyl, aux_alfa_2_G,
-     & aux_gamma_1_G,aux_beta_2_G, aux_f1, LDB,
+     & aux_gamma_1_G,aux_beta_2_G, f1, LDB,
      & pBuffer) 
 
 !$acc end host_data
-!$acc exit data copyout(aux_f1)
+!$acc exit data copyout(f1)
+
 #endif
        else 
+!$acc update host(f1)               
        CALL  DGTTRS(TRANS,nx,nyl,aux_alfa_1_G,aux_gamma_1_G,
-     &        aux_beta_1_G,ww_1_G,ipv_1_G,aux_f1,LDB,INFO)
+     &        aux_beta_1_G,ww_1_G,ipv_1_G,f1,LDB,INFO)
 
         
 
@@ -89,11 +88,14 @@ c*******************************
           write(*,*) 'Problemi soluzione, info:', info
         stop
         endif
-      endif 
+      endif
 
 !!!!!!!!!!!    CPU END !!!!!!!!!!!
-
-        call nvtxEndRange()
-
+        do iy = 1,nyl
+           do ix = 1,nx         
+              aux_f1(ix,iy) = f1(ix,iy)
+           enddo
+        enddo   
+       call nvtxEndRange()
 	return
         end
