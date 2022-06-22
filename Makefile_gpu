@@ -18,7 +18,7 @@ all: $(COMM) MAIN
 
 # definit une macro OBJ pour les fichiers objets
 
-OBJ= nvtx.o gpu_func.o corrente_res.o der1x_free.o der1x_y.o \
+OBJ= nvtx.o gpu_func.o corrente_res.o der1x_free.o der1x_yz.o \
      der1y.o der1z.o der2y.o filterx_t.o filtery_t.o filterz_t.o \
      filter_yz_mod.o ftrout.o gpmio.o helm_mod.o init_mod.o new_recon.o out_field.o \
      out_field_rhs.o out_grid.o out_inv.o outwrite.o poisson_mod.o pstartup.o \

@@ -47,13 +47,11 @@ c     derivo (rispetto a x)
          enddo
       enddo
 
-      do iz=1,nzl
-            CALL der1x_y(f1(:,:,iz),d1(:,:,iz),use_gpu)
-            CALL der1x_y(f2(:,:,iz),d2(:,:,iz),use_gpu)
-            CALL der1x_y(ff1(:,:,iz),dd1(:,:,iz),use_gpu)
-            CALL der1x_y(ff2(:,:,iz),dd2(:,:,iz),use_gpu)
-            CALL der1x_y(fff1(:,:,iz),ddd1(:,:,iz),use_gpu)
-      enddo
+            CALL der1x_yz(f1,d1,use_gpu)
+            CALL der1x_yz(f2,d2,use_gpu)
+            CALL der1x_yz(ff1,dd1,use_gpu)
+            CALL der1x_yz(ff2,dd2,use_gpu)
+            CALL der1x_yz(fff1,ddd1,use_gpu)
 !       call nvtxStartRange('after der1x_y',13)
          ierr=cudaDeviceSynchronize() 
 !$acc parallel loop collapse(3)
