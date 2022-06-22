@@ -26,7 +26,7 @@ c  This routine calculates the first derivative in x direction (CFD 3 points)
         
 
         call nvtxStartRange('der1x_y',17)
-!$acc parallel loop present(F0,f1) copyin(aa_1_G,bb_1_G,cc_1_G,d_1_G)
+!$acc parallel loop present(F0,f1) present(aa_1_G,bb_1_G,cc_1_G,d_1_G)
         do iy = 1, nyl
 !$acc loop seq        
             do ix = 2, nx-1

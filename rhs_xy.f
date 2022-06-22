@@ -15,6 +15,8 @@
       real(8), dimension (nx,nyl,nzl) ::  
      &     phix,psix,hpx,hmx,curx,cury
 
+      integer(4) ierr
+
 
 
 c      dimension zmagn(nx,nyl)
@@ -28,9 +30,9 @@ c     derivo (rispetto a x)
 !$acc& ff2(1:nx,1:nyl),fff1(1:nx,1:nyl))
 !$acc& create(d1(1:nx,1:nyl),d2(1:nx,1:nyl),dd1(1:nx,1:nyl),
 !$acc& dd2(1:nx,1:nyl),ddd1(1:nx,1:nyl))
-!!$acc& create(phix(1:nx,1:nyl,1:nzl),curx(1:nx,1:nyl,1:nzl))
-!!$acc& create(psix(1:nx,1:nyl,1:nzl))
-!!$acc& create(hpx(1:nx,1:nyl,1:nzl),hmx(1:nx,1:nyl,1:nzl))       
+!$acc& create(phix(1:nx,1:nyl,1:nzl),curx(1:nx,1:nyl,1:nzl))
+!$acc& create(psix(1:nx,1:nyl,1:nzl))
+!$acc& create(hpx(1:nx,1:nyl,1:nzl),hmx(1:nx,1:nyl,1:nzl))       
       do iz = 1,nzl
 !$acc parallel loop present(f1,f2,ff1,ff2,fff1,phi,psi,cur,hp1,uu) 
 !$acc& collapse(2)      
@@ -51,7 +53,9 @@ c     derivo (rispetto a x)
             CALL der1x_y(ff2,dd2,use_gpu)
             CALL der1x_y(fff1,ddd1,use_gpu)
        call nvtxStartRange('after der1x_y',13)
-!$acc update host(d1,d2,dd1,dd2,ddd1)       
+         ierr=cudaDeviceSynchronize() 
+!$acc parallel loop collapse(2)
+!$acc& present(phix,d1,x,psix,d2,curx,dd1,hpx,dd2,hmx,ddd1)         
         do iy = 1,nyl
             do ix = 1,nx
 !***************** Bikley jet **************************
@@ -92,9 +96,9 @@ c     derivo (rispetto a x)
 !$acc exit data delete(phi,psi,cur,hp1,uu,x)
 !$acc& delete(f1,f2,ff1,ff2,fff1)
 !$acc& delete(d1,d2,dd1,dd2,ddd1)
-!!$acc& delete(phix(1:nx,1:nyl,1:nzl),curx(1:nx,1:nyl,1:nzl))
-!!$acc& delete(psix(1:nx,1:nyl,1:nzl))
-!!$acc& delete(hpx(1:nx,1:nyl,1:nzl),hmx(1:nx,1:nyl,1:nzl))       
+!$acc& copyout(phix(1:nx,1:nyl,1:nzl),curx(1:nx,1:nyl,1:nzl))
+!$acc& copyout(psix(1:nx,1:nyl,1:nzl))
+!$acc& copyout(hpx(1:nx,1:nyl,1:nzl),hmx(1:nx,1:nyl,1:nzl))       
 
 !---------derivo cur rispetto a y--------------
 

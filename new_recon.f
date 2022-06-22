@@ -716,6 +716,7 @@
         deallocate(fact_aa_1,fact_bb_1,fact_cc_1)
         deallocate(fact_ww_1,ipv_my_1)
         deallocate(e_para,abs_b)
+!$acc exit data delete(aa_1_G,bb_1_G,cc_1_G,d_1_G)        
 !$acc exit data delete(aux_alfa_2_G, aux_beta_2_G, aux_gamma_1_G)
 !        deallocate(d2_uu)
 !        deallocate(uu_temp)

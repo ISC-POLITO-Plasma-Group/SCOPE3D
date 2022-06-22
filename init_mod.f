@@ -578,6 +578,7 @@ c   filter parameters
       enddo
       aux_gamma_1_G(nx) = 1.0d0
 
+!$acc enter data copyin(aa_1_G,bb_1_G,cc_1_G,d_1_G)      
       if (use_gpu) then
 
       aux_beta_2_G(1:nx-1)=aux_beta_1_G(1:nx-1)
