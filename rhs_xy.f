@@ -107,18 +107,8 @@ c     derivo (rispetto a x)
         aux = cur
 
         call trasponi_yx(aux,aux_t,1)
+        call  der1y_xz(aux_t)
 
-        do iz = 1,nzl
-           do ix = 1,nxl
-              do iy = 1,ny
-                 ff3(iy) = aux_t(ix,iy,iz)
-              enddo
-              CALL der1y(ff3,dd3)
-              do iy = 1,ny
-                 aux_t(ix,iy,iz) = dd3(iy)
-              enddo
-           enddo
-        enddo
 
         call trasponi_yx(aux,aux_t,-1)
 
