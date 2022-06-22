@@ -450,11 +450,15 @@
 !------------------------------------------------------
 !      inizio Adams-Bashforth
 !-----------------------------------------------------
-
+      
         ir = 1
         call nvtxStartRange('main_loop',3)
         do  it = 1, nstep 
-
+           if (it == 3) then 
+                   call cudaProfilerStart
+           elseif (it == 6) then
+                   call cudaProfilerStop
+           endif   
         call nvtxStartRange('timestep',4)
            time = it * dt + oldtime
      
