@@ -4,29 +4,32 @@
 ! Usata per derivare G+ e G-                          !
 ! --------------------------------------------------- !
 
-        subroutine der1x_yz(F0,f1,use_gpu_here)
+        subroutine der1x_yz(F0,f1,use_gpu_here,stream)
 
 c  This routine calculates the first derivative in x direction (CFD 3 points)
         use nvtx
         use gpu_func
         use cudafor
         use cusparse
+        use openacc
         include 'par.inc'   
 
         dimension F0(nx,nyl,nzl),f1(nx,nyl,nzl)
-        integer(4)::  ierr
-!        logical use_gpu
-        logical use_gpu_here 
 
-!       use_gpu_here  = .false.
-!       if(present(use_gpu)) use_gpu_here = use_gpu 
-!       costruzione termine noto
+        ! gpu variables
+        integer(4) ::  ierr
+        logical :: use_gpu_here 
+        integer(kind=cuda_stream_kind) :: stream
+        integer :: strid
         
 
         call nvtxStartRange('der1x_y',17)
-!$acc parallel loop present(F0,f1) present(aa_1_G,bb_1_G,cc_1_G,d_1_G)
-!$acc& collapse(2)        
-       do iz=1,nzl
+
+        ! Set the streamid equiv to the one created for cusparse
+        call acc_set_cuda_stream(strid, stream)
+
+!$acc parallel loop collapse(2) async(strid)       
+        do iz=1,nzl
           do iy = 1, nyl
 !$acc loop seq        
             do ix = 2, nx-1
@@ -50,53 +53,57 @@ c  This routine calculates the first derivative in x direction (CFD 3 points)
 !        write(*,*) 'OCCHIO ai COEFFICIENTI in DER1X'
 !        write(*,*)  f1(1)
       
-       enddo
-      enddo
+         enddo
+        enddo
        
+!        do i=1,nx
+!        write(63,*) aux_alfa_1(i),aux_gamma_1(i),aux_beta_1(i)
+!        enddo
+
         if (use_gpu_here) then 
 #ifdef _OPENACC                
 
-
-!        do i=1,nx
-!        write(63,*) aux_alfa_1(i),aux_gamma_1(i),aux_beta_1(i) 
-!        enddo
+          ! Set the stream for the cusparse        
+          ierr = ierr + cusparseSetStream(handle, stream)
 
 !$acc host_data use_device(aux_alfa_2_G,aux_gamma_1_G,aux_beta_2_G,
 !$acc& f1)
 
-      if ( .not. allocated(pbuffer) ) then
-       ierr=ierr + cusparseDgtsv2_nopivot_bufferSize(handle,nx,nyl*nzl,
-     & aux_alfa_2_G,
-     & aux_gamma_1_G,aux_beta_2_G,f1,LDB,
-     & pBufferSizeInBytes)
+          if ( .not. allocated(pbuffer) ) then
+            ! Compute buffersize for the cusparse and allocate
+            ierr=ierr + cusparseDgtsv2_nopivot_bufferSize(handle,
+     &      nx,nyl*nzl,aux_alfa_2_G,
+     &      aux_gamma_1_G,aux_beta_2_G,f1,LDB,
+     &      pBufferSizeInBytes)
+            !write(*,*) 'buffersize=', pBufferSizeInBytes
+            allocate(pBuffer(pBufferSizeInBytes))
+          endif
 
-       write(*,*) 'buffersize=', pBufferSizeInBytes
-       allocate(pBuffer(pBufferSizeInBytes))
-      endif
+          ! Do cusparse, nopivot algorithm
+          ierr= ierr + cusparseDgtsv2_nopivot(handle, nx, nyl*nzl, 
+     &    aux_alfa_2_G,
+     &    aux_gamma_1_G,aux_beta_2_G, f1, LDB,
+     &    pBuffer) 
 
-       ierr= ierr + cusparseDgtsv2_nopivot(handle, nx, nyl*nzl, 
-     & aux_alfa_2_G,
-     & aux_gamma_1_G,aux_beta_2_G, f1, LDB,
-     & pBuffer) 
 !$acc end host_data
 
 #endif
-       else 
+        else
+
 !$acc update host(f1) 
-      do iz=1,nzl              
-       CALL  DGTTRS(TRANS,nx,nyl,aux_alfa_1_G,aux_gamma_1_G,
+          do iz=1,nzl              
+              CALL  DGTTRS(TRANS,nx,nyl,aux_alfa_1_G,aux_gamma_1_G,
      &        aux_beta_1_G,ww_1_G,ipv_1_G,f1(:,:,iz),LDB,INFO)
-      enddo
+          enddo
 
-        
+          if (info > 0 .or. info < 0) then
+              write(*,*) 'Problemi soluzione, info:', info
+              stop
+          endif
 
-        if (info > 0 .or. info < 0) then
-          write(*,*) 'Problemi soluzione, info:', info
-        stop
         endif
-      endif
 
-!!!!!!!!!!!    CPU END !!!!!!!!!!!
-       call nvtxEndRange()
-	return
-        end
+        call nvtxEndRange()
+      return
+
+      end

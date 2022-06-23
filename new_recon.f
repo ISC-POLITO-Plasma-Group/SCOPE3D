@@ -142,14 +142,20 @@
 !      allocate(d2_uu(nx,nyl,nzl))
 !      allocate(uu_temp(nx,nyl,nzl))
       
-!!!!! Initializing stuff for GPU !!!!!!
-        if (use_gpu) then
+!!!! GPU INIT ..............................
+      if (use_gpu) then
                 
         call nvtxStartRange('handler',15)
         ierr=cusparseCreate(handle)
+        ierr = ierr + cudastreamcreate(streamd1)
+        ierr = ierr + cudastreamcreate(streamd2)
+        ierr = ierr + cudastreamcreate(streamdd1)
+        ierr = ierr + cudastreamcreate(streamdd2)
+        ierr = ierr + cudastreamcreate(streamddd1)
         if (ierr .ne. 0) write(*,*) 'handle creation failed'
         call nvtxEndRange()
-        endif 
+      endif 
+!!!! GPU INIT ...............................
 
       if(istart.EQ.1) then
          

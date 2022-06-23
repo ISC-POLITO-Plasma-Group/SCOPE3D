@@ -31,13 +31,13 @@ c     derivo (rispetto a x)
 !$acc& create(d1,d2,dd1,dd2,ddd1)
 !$acc& create(phix,curx,psix,hpx,hmx) 
 
-            CALL der1x_yz(phi,d1,use_gpu)
-            CALL der1x_yz(psi,d2,use_gpu)
-            CALL der1x_yz(cur,dd1,use_gpu)
-            CALL der1x_yz(hp1,dd2,use_gpu)
-            CALL der1x_yz(uu,ddd1,use_gpu)
+      CALL der1x_yz(phi,d1,use_gpu,streamd1)
+      CALL der1x_yz(psi,d2,use_gpu,streamd2)
+      CALL der1x_yz(cur,dd1,use_gpu,streamdd1)
+      CALL der1x_yz(hp1,dd2,use_gpu,streamdd2)
+      CALL der1x_yz(uu,ddd1,use_gpu,streamddd1)
 !       call nvtxStartRange('after der1x_y',13)
-         ierr=cudaDeviceSynchronize() 
+      if ( use_gpu )  ierr=cudaDeviceSynchronize() 
 !$acc parallel loop collapse(3)
 !$acc& present(phix,d1,x,psix,d2,curx,dd1,hpx,dd2,hmx,ddd1) 
       do iz=1,nzl        
@@ -78,7 +78,7 @@ c     derivo (rispetto a x)
             enddo
          enddo
 
-!         call nvtxEndRange()
+!     call nvtxEndRange()
       enddo
 
 !$acc exit data delete(phi,psi,cur,hp1,uu,x)
@@ -87,24 +87,24 @@ c     derivo (rispetto a x)
 
 !---------derivo cur rispetto a y--------------
 
-        aux = cur
+      aux = cur
 
-        call trasponi_yx(aux,aux_t,1)
-        call  der1y_xz(aux_t)
+      call trasponi_yx(aux,aux_t,1)
+      call  der1y_xz(aux_t)
 
 
-        call trasponi_yx(aux,aux_t,-1)
+      call trasponi_yx(aux,aux_t,-1)
 
-        cury = aux
+      cury = aux
 
 !--------------------------------------------------
 
-        rhshpxy1 = - (phix * hpy - phiy * hpx)
+      rhshpxy1 = - (phix * hpy - phiy * hpx)
 !     &             - (0.3d0*0.3d0) * (psix * hmy - psiy * hmx)
      &             - (rhos2) * (psix * hmy - psiy * hmx)
      &             - eta * cur_old
 
-        rhshmxy1 = - (phix * hmy - phiy * hmx)
+      rhshmxy1 = - (phix * hmy - phiy * hmx)
      &             - 1.0*2./beta_e * (psix * cury - psiy * curx)
 
 !        rhspascalxy1 = - (psix * pascaly - psiy * pascalx)
@@ -118,8 +118,8 @@ c     derivo (rispetto a x)
 
 
 
-        e_para = phix * psiy - phiy * psix
-        abs_b = sqrt(psix**2. + psiy**2. + 1.0d0)
+      e_para = phix * psiy - phiy * psix
+      abs_b = sqrt(psix**2. + psiy**2. + 1.0d0)
 
 !      do iz = 1,nzl
 
@@ -151,5 +151,5 @@ c      Emag = sum(Ene_z)
 
 c      CALL PARALLEL_SUM_REAL(Emag,1)
 
-        call nvtxEndRange()
+      call nvtxEndRange()
       end 
