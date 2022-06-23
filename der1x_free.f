@@ -15,8 +15,6 @@ c  This routine calculates the first derivative in x direction (CFD 3 points)
 
         dimension aux_f1(nx),F0(nx),f1(nx)
         integer(4)::  ierr
-        integer(8):: pBufferSizeInBytes
-        character(1), device, allocatable:: pBuffer(:)       
 !        logical use_gpu
         logical use_gpu_here 
 
@@ -60,13 +58,15 @@ c*******************************
 !$acc host_data use_device(aux_alfa_2_G,aux_gamma_1_G,aux_beta_2_G,
 !$acc& aux_f1)
 
+       if ( .not. allocated(pbuffer1d) ) then
        ierr=ierr + cusparseDgtsv2_bufferSize(handle,nx,NRHS,
      & aux_alfa_2_G,
      & aux_gamma_1_G,aux_beta_2_G,aux_f1,LDB,
-     & pBufferSizeInBytes)
+     & pBufferSizeInBytes1d)
 
-       write(*,*) 'buffersize=', pBufferSizeInBytes
-       allocate(pBuffer(pBufferSizeInBytes))
+       write(*,*) 'buffersize=', pBufferSizeInBytes1d
+       allocate(pBuffer1d(pBufferSizeInBytes1d))
+       endif
 
        ierr= ierr + cusparseDgtsv2(handle, nx, NRHS, aux_alfa_2_G,
      & aux_gamma_1_G,aux_beta_2_G, aux_f1, LDB,

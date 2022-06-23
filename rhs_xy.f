@@ -28,30 +28,14 @@ c      dimension zmagn(nx,nyl)
 c     derivo (rispetto a x)
        call nvtxStartRange('rhs_xy',13)
 !$acc enter data copyin(phi,psi,cur,hp1,uu,x) 
-!$acc& create(f1,f2,ff1,ff2,fff1)
 !$acc& create(d1,d2,dd1,dd2,ddd1)
 !$acc& create(phix,curx,psix,hpx,hmx) 
 
-!$acc parallel loop present(f1,f2,ff1,ff2,fff1,phi,psi,cur,hp1,uu) 
-!$acc& collapse(3)
-      do iz = 1,nzl
-         do iy = 1,nyl
-            do ix = 1,nx
-               f1(ix,iy,iz) = phi(ix,iy,iz)
-               f2(ix,iy,iz) = psi(ix,iy,iz)
-               ff1(ix,iy,iz) = cur(ix,iy,iz)
-               ff2(ix,iy,iz) = hp1(ix,iy,iz)
-               fff1(ix,iy,iz) = uu(ix,iy,iz)
-               
-            enddo
-         enddo
-      enddo
-
-            CALL der1x_yz(f1,d1,use_gpu)
-            CALL der1x_yz(f2,d2,use_gpu)
-            CALL der1x_yz(ff1,dd1,use_gpu)
-            CALL der1x_yz(ff2,dd2,use_gpu)
-            CALL der1x_yz(fff1,ddd1,use_gpu)
+            CALL der1x_yz(phi,d1,use_gpu)
+            CALL der1x_yz(psi,d2,use_gpu)
+            CALL der1x_yz(cur,dd1,use_gpu)
+            CALL der1x_yz(hp1,dd2,use_gpu)
+            CALL der1x_yz(uu,ddd1,use_gpu)
 !       call nvtxStartRange('after der1x_y',13)
          ierr=cudaDeviceSynchronize() 
 !$acc parallel loop collapse(3)
@@ -98,7 +82,6 @@ c     derivo (rispetto a x)
       enddo
 
 !$acc exit data delete(phi,psi,cur,hp1,uu,x)
-!$acc& delete(f1,f2,ff1,ff2,fff1)
 !$acc& delete(d1,d2,dd1,dd2,ddd1)
 !$acc& copyout(phix,curx,psix,hpx,hmx)       
 
